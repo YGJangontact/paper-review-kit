@@ -8,3 +8,6 @@ status.json
 examples/lora/page*.png
 examples/lora/exports/qa.html
 docs/mobile-preview.html
+
+docs/naver-part-*.html
+docs/naver-published.png

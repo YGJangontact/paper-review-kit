@@ -72,3 +72,9 @@ python hooks/review_hook.py examples/lora check
 ## 라이선스
 
 직접 작성한 코드·지침은 MIT입니다. 슬라이드 기반 템플릿의 별도 MIT 고지는 `assets/LICENSE-frontend-slides`에 있습니다. 논문 원문 및 외부 자료의 권리는 각각의 저작자에게 있습니다.
+
+## 공개 결과물
+
+- [리뷰·슬라이드 데모](https://ygjangontact.github.io/paper-review-kit/)
+- [네이버 제작기](https://blog.naver.com/yg_world90/224449863865)
+- [제작기 원고](docs/naver-post.md)
