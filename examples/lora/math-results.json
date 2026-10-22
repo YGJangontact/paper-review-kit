@@ -1,0 +1,60 @@
+{
+  "scope": "synthetic linear arithmetic; no model training",
+  "cases": [
+    {
+      "alpha": 0.0,
+      "output": [
+        [
+          2.0
+        ],
+        [
+          3.0
+        ]
+      ],
+      "max_abs_error": 0.0
+    },
+    {
+      "alpha": 0.5,
+      "output": [
+        [
+          1.0
+        ],
+        [
+          2.5
+        ]
+      ],
+      "max_abs_error": 0.0
+    },
+    {
+      "alpha": 1.0,
+      "output": [
+        [
+          0.0
+        ],
+        [
+          2.0
+        ]
+      ],
+      "max_abs_error": 0.0
+    },
+    {
+      "alpha": 2.0,
+      "output": [
+        [
+          -2.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "max_abs_error": 0.0
+    }
+  ],
+  "parameter_count": {
+    "d": 1024,
+    "k": 1024,
+    "r": 4,
+    "full": 1048576,
+    "lora": 8192
+  }
+}

@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pdf
+*.pages.json
+.cache/
+status.json
+*.tmp
+examples/lora/page*.png
+examples/lora/exports/qa.html
+docs/mobile-preview.html

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck Title</title>
+<!--
+  interactive-slides deck template.
+  Fixed 1920x1080 stage + navigation core adapted from frontend-slides
+  (https://github.com/zarazhangrui/frontend-slides, MIT, (c) 2025 Zara Zhang).
+  Everything between "SLIDES START" and "SLIDES END" is content; the runtime at the bottom
+  should normally be left as is.
+-->
+
+<!-- === FONTS — Google Fonts only, so the same file also publishes as a claude.ai artifact.
+     A locally installed Pretendard wins automatically (first in the font stack). === -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@500;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Math&display=swap">
+
+<!-- === OPTIONAL: KaTeX (delete this block if the deck has no math).
+     Rendered as MathML, so no KaTeX stylesheet/fonts are needed. === -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<style>
+/* ===========================================
+   THEME TOKENS — change the look here.
+   Two presets: data-preset="academic" (lab meeting, conference)
+   and data-preset="lecture" (blog lecture, public talk) on <body>.
+   =========================================== */
+:root {
+  --stage-bg: #101114;
+  --font-body: 'Pretendard Variable', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-display: var(--font-body);
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --size-h1: 96px; --size-h2: 64px; --size-h3: 40px; --size-body: 34px; --size-small: 26px;
+  --pad-y: 104px; --pad-x: 128px; --gap: 40px;
+  --radius: 18px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+body[data-preset="academic"] {
+  --bg: #f7f6f2; --bg-alt: #ecebe5; --surface: #ffffff; --line: #d9d7cf;
+  --text: #1c1d21; --muted: #5d6068; --accent: #1f5fbf; --accent-2: #c8611a;
+  --font-display: 'Noto Serif KR', Georgia, serif;
+}
+body[data-preset="lecture"] {
+  --bg: #15171c; --bg-alt: #1d2027; --surface: #232733; --line: #343a48;
+  --text: #f1f0ec; --muted: #a3a8b4; --accent: #ffb547; --accent-2: #5ec8f2;
+  --size-h1: 112px; --size-h2: 72px; --size-body: 36px;
+}
+
+/* ===========================================
+   FIXED 16:9 STAGE (do not edit)
+   =========================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--stage-bg); }
+body { font-family: var(--font-body); color: var(--text); -webkit-font-smoothing: antialiased; }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--bg); }
+.slide {
+  position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden;
+  visibility: hidden; opacity: 0; pointer-events: none;
+  background: var(--bg);
+  padding: var(--pad-y) var(--pad-x);
+  display: flex; flex-direction: column; gap: var(--gap);
+  font-size: var(--size-body); line-height: 1.5;
+  transition: opacity .35s var(--ease), visibility 0s linear .35s;
+}
+.slide.active { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; transition: opacity .35s var(--ease); }
+.slide img, .slide video, .slide canvas, .slide svg { max-width: 100%; max-height: 100%; }
+.slide aside.notes { display: none; }
+.slide math { font-size: 1.05em; font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', 'Noto Sans Math', math; } /* math font makes () and √ stretch */
+.slide math[display="block"] { margin: 12px 0; }
+
+/* Step builds: .step elements appear one per "next" press. */
+.step { opacity: 0; transform: translateY(16px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+.step.shown { opacity: 1; transform: none; }
+
+/* ===========================================
+   SLIDE COMPONENTS
+   =========================================== */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; word-break: keep-all; }
+h1 { font-size: var(--size-h1); }
+h2 { font-size: var(--size-h2); }
+h3 { font-size: var(--size-h3); }
+p, li { word-break: keep-all; }
+.kicker { font-size: var(--size-small); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 44px; line-height: 1.4; color: var(--muted); max-width: 1400px; }
+.muted { color: var(--muted); }
+.small { font-size: var(--size-small); }
+.accent { color: var(--accent); }
+ul.points { list-style: none; display: flex; flex-direction: column; gap: 22px; }
+ul.points li { padding-left: 44px; position: relative; }
+ul.points li::before { content: ''; position: absolute; left: 0; top: .62em; width: 18px; height: 4px; background: var(--accent); border-radius: 2px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; } /* cards size to content; add .fill to stretch */
+.cols.fill { flex: 1; min-height: 0; align-items: stretch; }
+.cols.c3 { grid-template-columns: repeat(3, 1fr); }
+.cols.wide-left { grid-template-columns: 3fr 2fr; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 40px; display: flex; flex-direction: column; gap: 16px; }
+.big-number { font-family: var(--font-display); font-size: 160px; font-weight: 700; line-height: 1; color: var(--accent); }
+.spacer { flex: 1; }
+.slide-footer { position: absolute; left: var(--pad-x); right: var(--pad-x); bottom: 44px; display: flex; justify-content: space-between; font-size: 22px; color: var(--muted); }
+pre.code { font-family: var(--font-mono); font-size: 26px; line-height: 1.55; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 36px; overflow: hidden; white-space: pre; }
+figure { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+figure img { object-fit: contain; border-radius: 12px; }
+figcaption { font-size: var(--size-small); color: var(--muted); }
+
+/* Cover and statement slides */
+.slide.cover { justify-content: center; background: var(--bg-alt); }
+.slide.cover h1 { max-width: 1500px; }
+.slide.statement { justify-content: center; align-items: flex-start; background: var(--accent); color: var(--bg); }
+.slide.statement h2 { font-size: 88px; max-width: 1500px; }
+
+/* Demo panels: a stage (canvas/svg) plus a controls column. */
+.demo { display: grid; grid-template-columns: 1fr 460px; gap: 40px; flex: 1; min-height: 0; }
+.demo-stage { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; min-height: 0; }
+.demo-stage canvas, .demo-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; }
+.demo-controls { display: flex; flex-direction: column; gap: 28px; font-size: 28px; }
+.demo-controls label { display: flex; flex-direction: column; gap: 10px; }
+.demo-controls output { font-family: var(--font-mono); color: var(--accent); }
+.demo-controls input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
+.demo-controls button { font: inherit; font-size: 26px; padding: 14px 24px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+.demo-controls button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+.demo-readout { font-family: var(--font-mono); font-size: 26px; color: var(--muted); }
+[data-demo-error]::after { content: '데모 오류: ' attr(data-demo-error); position: absolute; left: 16px; bottom: 16px; right: 16px; padding: 12px 16px; background: #b3261e; color: #fff; font-size: 22px; border-radius: 8px; z-index: 5; }
+
+/* ===========================================
+   DECK CHROME (outside the stage; hidden in print and embeds)
+   =========================================== */
+.deck-progress { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--accent); transition: width .3s var(--ease); z-index: 1000; }
+.deck-counter { position: fixed; right: 18px; bottom: 12px; font: 14px/1 var(--font-mono); color: #8a8f99; z-index: 1000; opacity: .8; }
+.deck-jump { position: fixed; left: 50%; top: 24px; transform: translateX(-50%); padding: 10px 18px; background: #000c; color: #fff; font: 20px var(--font-mono); border-radius: 8px; z-index: 1001; display: none; }
+.deck-black { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; }
+body.blackout .deck-black { display: block; }
+body.embed .deck-progress, body.embed .deck-counter { display: none; }
+
+/* Presenter view (press S) */
+body.presenter .deck-viewport, body.presenter .deck-progress, body.presenter .deck-counter { display: none; }
+.presenter-ui { position: fixed; inset: 0; display: grid; grid-template-columns: 3fr 2fr; grid-template-rows: auto 1fr; gap: 16px; padding: 16px; background: #0d0e11; color: #e9e9ea; font-family: var(--font-body); }
+.presenter-ui .p-head { grid-column: 1 / -1; display: flex; gap: 32px; align-items: baseline; font: 600 28px var(--font-mono); }
+.presenter-ui .p-head .p-timer { color: #ffb547; cursor: pointer; }
+.presenter-ui .p-frames { display: grid; grid-template-rows: 3fr 2fr; gap: 12px; min-height: 0; }
+.presenter-ui iframe { width: 100%; height: 100%; border: 1px solid #333; border-radius: 8px; background: #000; }
+.presenter-ui .p-notes { overflow: auto; font-size: 24px; line-height: 1.6; white-space: pre-wrap; padding: 8px 12px; background: #16181d; border-radius: 8px; }
+
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+  .deck-viewport { position: static; overflow: visible; }
+  .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
+  .slide { position: relative; visibility: visible !important; opacity: 1 !important; break-after: page; transition: none; }
+  .slide:last-child { break-after: auto; }
+  .step { opacity: 1 !important; transform: none !important; }
+  .deck-progress, .deck-counter, .deck-jump, .deck-black, .presenter-ui { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body data-preset="academic">
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+<!-- ================= SLIDES START ================= -->
+
+<section class="slide cover" id="cover">
+  <p class="kicker">Lab Meeting · 2026.10</p>
+  <h1>슬라이드 제목을 여기에</h1>
+  <p class="lead">한 줄 부제 — 이 발표에서 무엇을 얻어 가는지</p>
+  <aside class="notes">발표자 노트: 인사와 발표 목적.</aside>
+</section>
+
+<section class="slide" id="outline">
+  <p class="kicker">Overview</p>
+  <h2>오늘 다룰 세 가지</h2>
+  <ul class="points">
+    <li class="step">문제 정의 — 왜 이게 어려운가</li>
+    <li class="step">핵심 아이디어 — 수식 \( y = A\sin(2\pi f t) \) 하나로 설명</li>
+    <li class="step">직접 만져 보는 데모</li>
+  </ul>
+  <aside class="notes">→ 키를 누를 때마다 한 줄씩 나타남.</aside>
+</section>
+
+<section class="slide" id="demo-wave">
+  <p class="kicker">Demo</p>
+  <h2>주파수와 진폭을 직접 바꿔 보기</h2>
+  <div class="demo" id="waveDemo">
+    <div class="demo-stage"><canvas></canvas></div>
+    <div class="demo-controls">
+      <label>주파수 f <output data-out="f">2.0 Hz</output>
+        <input type="range" name="f" min="0.5" max="6" step="0.1" value="2"></label>
+      <label>진폭 A <output data-out="a">0.8</output>
+        <input type="range" name="a" min="0.1" max="1" step="0.05" value="0.8"></label>
+      <button class="primary" data-act="toggle">▶ 재생 / 일시정지</button>
+      <p class="demo-readout">Esc: 컨트롤에서 빠져나와 슬라이드 넘기기</p>
+    </div>
+  </div>
+  <aside class="notes">슬라이더를 움직여 보여 주고, Esc 후 → 로 다음 슬라이드.</aside>
+</section>
+
+<section class="slide statement" id="takeaway">
+  <h2>핵심 메시지 한 문장.</h2>
+</section>
+
+<!-- ================= SLIDES END ================= -->
+</main>
+</div>
+
+<script>
+/* ===========================================
+   DEMOS — one Deck.demo(...) per interactive slide.
+   mount: build DOM, draw a meaningful static state (this is what PDF/print shows).
+   enter/leave: start/stop work when the slide is shown/hidden.
+   api.raf(fn): per-frame callback that only runs while the slide is active.
+   =========================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  Deck.demo('#waveDemo', {
+    mount(el, api) {
+      const canvas = el.querySelector('canvas');
+      const ctx = api.fitCanvas(canvas);
+      const s = { f: 2, a: 0.8, t: 0, playing: true };
+      const css = getComputedStyle(document.body);
+      function draw() {
+        const { w, h } = api.size(canvas);
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = css.getPropertyValue('--line'); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+        ctx.strokeStyle = css.getPropertyValue('--accent'); ctx.lineWidth = 5;
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 2) {
+          const tt = x / w * 2 + s.t;
+          const y = h / 2 - s.a * (h * 0.4) * Math.sin(2 * Math.PI * s.f * tt);
+          x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.stroke();
+      }
+      api.bindRange('f', v => { s.f = v; draw(); }, v => v.toFixed(1) + ' Hz');
+      api.bindRange('a', v => { s.a = v; draw(); }, v => v.toFixed(2));
+      el.querySelector('[data-act=toggle]').addEventListener('click', () => { s.playing = !s.playing; });
+      api.raf(dt => { if (s.playing && !Deck.reducedMotion) { s.t += dt * 0.25; draw(); } });
+      api.onResize(draw);
+      draw();
+    }
+  });
+});
+</script>
+
+<script>
+/* ===========================================
+   DECK RUNTIME (leave as is)
+   Keys: → ↓ Space PageDown next · ← ↑ PageUp prev · Home/End · number+Enter jump
+         F fullscreen · S presenter view · B blackout · Esc leave a demo control
+   =========================================== */
+(() => {
+  const W = 1920, H = 1080;
+  const params = new URLSearchParams(location.search);
+  const MODE = params.has('presenter') ? 'presenter' : params.has('embed') ? 'embed' : 'deck';
+  const errors = [];
+  window.addEventListener('error', e => errors.push(String(e.message || e)));
+  window.addEventListener('unhandledrejection', e => errors.push(String(e.reason)));
+
+  const stage = document.getElementById('deckStage');
+  const slides = [...stage.querySelectorAll(':scope > .slide')];
+  const demos = [];
+  let cur = -1, step = 0, presenterWin = null;
+
+  const stepsOf = s => [...s.querySelectorAll('.step')];
+  const slideOf = el => el.closest('.slide');
+
+  function fit() {
+    const f = Math.min(innerWidth / W, innerHeight / H);
+    stage.style.transform = `translate(${(innerWidth - W * f) / 2}px, ${(innerHeight - H * f) / 2}px) scale(${f})`;
+    demos.forEach(d => d.resizers.forEach(fn => safe(d, fn)));
+  }
+
+  function safe(d, fn, ...args) {
+    try { return fn.apply(d.hooks, args); } // `this` inside hooks = the hooks object
+    catch (err) { errors.push(`${d.name}: ${err.message}`); d.el.setAttribute('data-demo-error', err.message); console.error(err); }
+  }
+
+  function show(i, st = 0, from = 'local') {
+    i = Math.max(0, Math.min(i, slides.length - 1));
+    const changed = i !== cur;
+    if (changed && cur >= 0) demos.filter(d => d.slide === slides[cur]).forEach(d => d.hooks.leave && safe(d, d.hooks.leave, d.el));
+    if (changed) slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    cur = i;
+    const ss = stepsOf(slides[i]);
+    step = st < 0 ? ss.length : Math.min(st, ss.length);
+    ss.forEach((e, k) => e.classList.toggle('shown', k < step));
+    if (changed) demos.filter(d => d.slide === slides[i]).forEach(d => d.hooks.enter && safe(d, d.hooks.enter, d.el));
+    if (MODE !== 'embed') history.replaceState(null, '', `#${i + 1}${step ? '.' + step : ''}`);
+    const prog = document.querySelector('.deck-progress'), cnt = document.querySelector('.deck-counter');
+    if (prog) prog.style.width = `${slides.length > 1 ? (i / (slides.length - 1)) * 100 : 100}%`;
+    if (cnt) cnt.textContent = `${i + 1} / ${slides.length}`;
+    const msg = { type: 'deck-state', i, step };
+    if (presenterWin && !presenterWin.closed && from !== 'presenter') presenterWin.postMessage(msg, '*');
+    if (MODE === 'presenter') { updatePresenter(); if (from !== 'opener' && window.opener) window.opener.postMessage({ type: 'deck-goto', i, step }, '*'); }
+  }
+  const next = () => { const n = stepsOf(slides[cur]).length; step < n ? show(cur, step + 1) : show(cur + 1, 0); };
+  const prev = () => { step > 0 ? show(cur, step - 1) : show(cur - 1, -1); };
+
+  function parseHash() {
+    const m = location.hash.match(/^#(\d+)(?:\.(\d+))?/);
+    return m ? [parseInt(m[1], 10) - 1, parseInt(m[2] || '0', 10)] : [0, 0];
+  }
+
+  /* ---------- keyboard ---------- */
+  let jumpBuf = '';
+  document.addEventListener('keydown', e => {
+    if (MODE === 'embed') return;
+    const t = e.target;
+    const inControl = t.closest && t.closest('input, select, textarea, button, [contenteditable], [data-capture-keys]');
+    const k = e.key;
+    if (k === 'Escape' && inControl) { t.blur(); return; }
+    if ((k === 'PageDown' || k === 'PageUp') && !(t.closest && t.closest('textarea'))) { e.preventDefault(); k === 'PageDown' ? next() : prev(); return; }
+    if (inControl || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^\d$/.test(k)) { jumpBuf += k; showJump(); return; }
+    if (k === 'Enter' && jumpBuf) { show(parseInt(jumpBuf, 10) - 1); jumpBuf = ''; showJump(); return; }
+    if (k === 'Backspace' && jumpBuf) { jumpBuf = jumpBuf.slice(0, -1); showJump(); return; }
+    switch (k) {
+      case 'ArrowRight': case 'ArrowDown': case ' ': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'ArrowUp': e.preventDefault(); prev(); break;
+      case 'Home': show(0); break;
+      case 'End': show(slides.length - 1, -1); break;
+      case 'f': case 'F': document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); break;
+      case 's': case 'S': if (MODE === 'deck') openPresenter(); break;
+      case 'b': case 'B': case '.': document.body.classList.toggle('blackout'); break;
+    }
+  });
+  function showJump() { const j = document.querySelector('.deck-jump'); if (!j) return; j.textContent = `→ ${jumpBuf}`; j.style.display = jumpBuf ? 'block' : 'none'; }
+
+  /* ---------- touch swipe (ignored on demo controls) ---------- */
+  let tx = null, ty = null;
+  document.addEventListener('touchstart', e => {
+    if (e.target.closest('.demo, input, button, [data-capture-pointer]')) { tx = null; return; }
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (tx === null) return;
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) dx < 0 ? next() : prev();
+    tx = null;
+  });
+
+  /* ---------- presenter view ---------- */
+  function openPresenter() {
+    const base = location.href.split('#')[0].split('?')[0];
+    presenterWin = window.open(`${base}?presenter#${cur + 1}.${step}`, 'deck-presenter', 'width=1280,height=800');
+  }
+  window.addEventListener('message', e => {
+    const d = e.data || {};
+    if (d.type === 'deck-goto') show(d.i, d.step, 'presenter');
+    if (d.type === 'deck-state') show(d.i, d.step, 'opener');
+  });
+  let pui = null, t0 = null, timerId = null;
+  function buildPresenter() {
+    document.body.classList.add('presenter');
+    const base = location.href.split('#')[0].split('?')[0];
+    pui = document.createElement('div');
+    pui.className = 'presenter-ui';
+    pui.innerHTML = `<div class="p-head"><span class="p-count"></span><span class="p-timer" title="클릭하면 초기화">00:00</span><span class="p-clock"></span></div>
+      <div class="p-frames"><iframe class="p-cur" src="${base}?embed"></iframe><iframe class="p-next" src="${base}?embed"></iframe></div>
+      <div class="p-notes"></div>`;
+    document.body.appendChild(pui);
+    pui.querySelector('.p-timer').addEventListener('click', () => { t0 = Date.now(); });
+    pui.querySelectorAll('iframe').forEach(f => f.addEventListener('load', updatePresenter));
+    t0 = Date.now();
+    timerId = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      pui.querySelector('.p-timer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+      pui.querySelector('.p-clock').textContent = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    }, 500);
+  }
+  function updatePresenter() {
+    if (!pui) return;
+    const n = stepsOf(slides[cur]).length;
+    const [ni, ns] = step < n ? [cur, step + 1] : [Math.min(cur + 1, slides.length - 1), 0];
+    pui.querySelector('.p-count').textContent = `${cur + 1} / ${slides.length}${n ? `  (step ${step}/${n})` : ''}`;
+    pui.querySelector('.p-cur').contentWindow?.postMessage({ type: 'deck-embed', i: cur, step }, '*');
+    pui.querySelector('.p-next').contentWindow?.postMessage({ type: 'deck-embed', i: ni, step: ns }, '*');
+    const notes = slides[cur].querySelector('aside.notes');
+    pui.querySelector('.p-notes').textContent = notes ? notes.textContent.trim() : '(노트 없음)';
+  }
+  if (MODE === 'embed') {
+    document.body.classList.add('embed');
+    window.addEventListener('message', e => { if (e.data && e.data.type === 'deck-embed') show(e.data.i, e.data.step, 'embed'); });
+  }
+
+  /* ---------- demo API ---------- */
+  let lastT = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;
+    demos.forEach(d => { if (d.slide === slides[cur]) d.frames.forEach(fn => safe(d, fn, dt)); });
+    requestAnimationFrame(frame);
+  }
+  const Deck = {
+    get index() { return cur; }, get step() { return step; }, slides, errors, mode: MODE,
+    reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    go: show, next, prev, demos,
+    demo(target, hooks) {
+      const el = typeof target === 'string' ? document.querySelector(target) : target;
+      if (!el) { errors.push(`demo target not found: ${target}`); return; }
+      const d = { el, hooks, name: el.id || target, slide: slideOf(el), frames: [], resizers: [], mounted: false };
+      const api = {
+        raf: fn => d.frames.push(fn),
+        onResize: fn => d.resizers.push(fn),
+        size: c => ({ w: c.clientWidth, h: c.clientHeight }),
+        fitCanvas(c) {
+          const ctx = c.getContext('2d');
+          const sync = () => { const r = window.devicePixelRatio || 1; c.width = c.clientWidth * r; c.height = c.clientHeight * r; ctx.setTransform(r, 0, 0, r, 0, 0); };
+          sync(); d.resizers.unshift(sync); return ctx;
+        },
+        bindRange(name, onInput, fmt = v => v) {
+          const inp = el.querySelector(`input[name="${name}"]`), out = el.querySelector(`[data-out="${name}"]`);
+          const upd = () => { const v = parseFloat(inp.value); if (out) out.textContent = fmt(v); onInput(v); };
+          inp.addEventListener('input', upd); if (out) out.textContent = fmt(parseFloat(inp.value));
+          return inp;
+        }
+      };
+      demos.push(d);
+      if (hooks.mount) safe(d, hooks.mount, el, api);
+      d.mounted = true;
+      if (d.slide === slides[cur] && hooks.enter) safe(d, hooks.enter, el);
+    }
+  };
+  window.Deck = Deck;
+
+  /* ---------- boot ---------- */
+  document.body.insertAdjacentHTML('beforeend', '<div class="deck-progress"></div><div class="deck-counter"></div><div class="deck-jump"></div><div class="deck-black"></div>');
+  window.addEventListener('resize', fit);
+  const [hi, hs] = parseHash();
+  show(hi, hs, 'boot');
+  fit();
+  requestAnimationFrame(frame);
+  if (MODE === 'presenter') { buildPresenter(); updatePresenter(); }
+  // KaTeX scripts are `defer`, so they have run by DOMContentLoaded — render math then, not on load.
+  const renderMath = () => {
+    if (window.renderMathInElement) renderMathInElement(document.body, {
+      delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }, { left: '\\[', right: '\\]', display: true }],
+      throwOnError: false, output: 'mathml'
+    });
+  };
+  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', renderMath) : renderMath();
+  window.addEventListener('load', fit);
+})();
+</script>
+</body>
+</html>

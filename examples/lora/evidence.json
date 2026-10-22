@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "title": "LoRA를 읽고, 근거와 계산을 남기는 논문 리뷰",
+  "question": "전체 가중치를 학습하지 않고도 작업에 적응시키는 방법은 무엇이며, 이번 리뷰에서 직접 확인할 수 있는 범위는 어디까지인가?",
+  "sources": [
+    {
+      "id": "LoRA",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "url": "https://arxiv.org/abs/2106.09685v2",
+      "doi": "10.48550/arXiv.2106.09685",
+      "version": "v2 (2021-10-16)",
+      "access": "full",
+      "checked": "2026-10-22"
+    },
+    {
+      "id": "QLoRA",
+      "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+      "url": "https://arxiv.org/abs/2305.14314v1",
+      "doi": "10.48550/arXiv.2305.14314",
+      "version": "v1 (2023-05-23)",
+      "access": "abstract",
+      "checked": "2026-10-22"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "text": "LoRA는 원래 가중치를 고정하고 두 행렬의 곱으로 업데이트를 표현한다.",
+      "source": "LoRA",
+      "locator": "Section 4.1, Eq. (3), PDF p.4",
+      "conditions": "W0: d×k, B: d×r, A: r×k. 본문은 업데이트에 alpha/r 스케일도 적용한다.",
+      "kind": "reported"
+    },
+    {
+      "id": "C2",
+      "text": "행렬을 미리 병합하면 추론 때 추가 분기를 계산하지 않아도 된다.",
+      "source": "LoRA",
+      "locator": "Section 4.1, PDF p.4",
+      "conditions": "고정된 어댑터를 W0에 합산하는 선형 연산. 실제 장치의 지연시간은 이번에 측정하지 않았다.",
+      "kind": "reported"
+    },
+    {
+      "id": "C3",
+      "text": "일부 가중치만 학습하는 것과 기반 모델을 메모리에 보관하지 않는 것은 다르다.",
+      "source": "LoRA",
+      "locator": "Section 4.2, PDF p.5, footnote 4",
+      "conditions": "학습할 매개변수, optimizer 상태, 기반 가중치 저장을 구분한다.",
+      "kind": "interpretation"
+    },
+    {
+      "id": "C4",
+      "text": "alpha는 항상 2r이어야 한다는 규칙은 이 논문의 일반 결론이 아니다.",
+      "source": "LoRA",
+      "locator": "Section 4.1, PDF p.4",
+      "conditions": "논문은 첫 시도 rank에 alpha를 맞추고 별도 조정하지 않았다고 설명한다.",
+      "kind": "interpretation"
+    },
+    {
+      "id": "C5",
+      "text": "QLoRA는 고정된 4비트 기반 모델을 통과해 LoRA 매개변수로 gradient를 전달하는 후속 접근이다.",
+      "source": "QLoRA",
+      "locator": "Abstract",
+      "conditions": "초록 기반 관계 확인. 세부 구현과 실험은 정독·재현하지 않았다.",
+      "kind": "reported"
+    }
+  ],
+  "relations": [
+    {
+      "from": "LoRA",
+      "to": "QLoRA",
+      "kind": "보완·후속 적용",
+      "basis": "QLoRA Abstract explicitly describes low-rank adapters with frozen 4-bit pretrained weights.",
+      "verified": true
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "basis": "C1",
+      "proposal": "rank를 키울 때 표현 가능한 변화가 늘어도 일반화 성능이 계속 좋아지는지는 별도 질문이다.",
+      "conditions": "동일 모델·데이터 분할·적용 층·학습 예산; rank와 alpha 설정을 함께 기록",
+      "experiment": "작은 공개 데이터에서 rank별 검증 손실과 학습 시간·메모리를 여러 seed로 비교한다. 이번 패키지에서는 미실행.",
+      "falsification": "높은 rank에서 검증 성능 개선이 반복되지 않으면 단조 개선 가설을 지지하지 않는다."
+    }
+  ]
+}

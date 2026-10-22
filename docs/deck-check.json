@@ -1,0 +1,53 @@
+{
+  "pass": true,
+  "slides": 6,
+  "stepsTotal": 0,
+  "demos": 1,
+  "slidesWithoutNotes": [],
+  "problems": [],
+  "warn": [],
+  "perSlide": [
+    {
+      "n": 1,
+      "id": "cover",
+      "steps": 0,
+      "demos": 0,
+      "notes": true
+    },
+    {
+      "n": 2,
+      "id": "workflow",
+      "steps": 0,
+      "demos": 0,
+      "notes": true
+    },
+    {
+      "n": 3,
+      "id": "method",
+      "steps": 0,
+      "demos": 0,
+      "notes": true
+    },
+    {
+      "n": 4,
+      "id": "experiment",
+      "steps": 0,
+      "demos": 1,
+      "notes": true
+    },
+    {
+      "n": 5,
+      "id": "results",
+      "steps": 0,
+      "demos": 0,
+      "notes": true
+    },
+    {
+      "n": 6,
+      "id": "sources",
+      "steps": 0,
+      "demos": 0,
+      "notes": true
+    }
+  ]
+}
